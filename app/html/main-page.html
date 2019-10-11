@@ -1,0 +1,234 @@
+﻿<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="utf-8" />
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
+    <script src="https://ajax.aspnetcdn.com/ajax/jQuery/jquery-3.4.1.min.js"></script>
+    <title>Parking simulator</title>
+</head>
+<body onload="startGame()">
+
+    <script>
+
+        var footOnGas = false;
+
+        var myGameArea = {
+            canvas: document.createElement("canvas"),
+            start: function () {
+                this.canvas.width = window.innerWidth * 0.9;
+                this.canvas.height = window.innerHeight * 0.8;
+                this.context = this.canvas.getContext("2d");
+                var section = document.body.getElementsByTagName("section");
+                //console.log(section);
+                section[0].appendChild(this.canvas);
+                
+            }
+        }
+
+
+        function startGame() {
+            myGameArea.start();
+            window.setInterval(myTimeout, 500);
+            window.setInterval(decreasingSpeedByTarque, 250);
+            window.setInterval(moveCar, 150);
+        }
+
+        function myTimeout() {
+            playerCar.update();
+        }
+
+        function decreasingSpeedByTarque() {
+            //console.log("torque")
+            if (playerCar.footOnGas == false && playerCar.speed > 0) {
+                playerCar.speed -= 0.5;
+                document.getElementById("speed").innerHTML = playerCar.speed;
+            }
+        }
+
+        function moveCar() {
+            if (playerCar.speed > 0) {
+                if (playerCar.gearType == "forward") {
+                    playerCar.x += playerCar.speed * Math.cos(playerCar.rotationAngle / 360 * 2 * Math.PI);
+                    playerCar.y += playerCar.speed * Math.sin(playerCar.rotationAngle / 360 * 2 * Math.PI);
+
+
+                    playerCar.rotationAngle += playerCar.speed / 5 * playerCar.wheelAngle / 10;
+
+                    
+                }
+                else {
+                     playerCar.x -= playerCar.speed * Math.cos(playerCar.rotationAngle / 360 * 2 * Math.PI);
+                     playerCar.y -= playerCar.speed * Math.sin(playerCar.rotationAngle / 360 * 2 * Math.PI);
+                     playerCar.rotationAngle -= playerCar.speed / 5 * playerCar.wheelAngle / 10;
+                }
+                //playerCar.rotationAngle = playerCar.rotationAngle % 
+                playerCar.rotationAngle = playerCar.rotationAngle % 360;
+                document.getElementById("rotationAngle").innerHTML = playerCar.rotationAngle + " degree(s)";
+                
+
+                
+                playerCar.update();
+            }
+
+            
+        }
+      
+
+        var playerCar = {
+            x: 100,
+            y: 100,
+            length: window.innerHeight / 10,
+            bredth: window.innerWidth / 20,
+            rotationAngle: 0,
+            wheelAngle: 0,
+            speed: 0,
+            acceleration: 0,
+            footOnGas: false,
+            gearType: "forward", // another one is "reverse"
+            color: "red",
+            update: function () {
+                ctx = myGameArea.context;
+                ctx.clearRect(0, 0, myGameArea.canvas.width, myGameArea.canvas.height);
+
+                ctx.fillStyle = 'rgb(235, 235, 224)';
+                ctx.fillRect(0, 0, window.innerWidth, window.innerHeight*0.4);
+
+                ctx.fillStyle = this.color;
+                ctx.save();
+                
+                
+                //
+                ctx.translate(this.x,this.y);
+                ctx.rotate(this.rotationAngle / 360 * 2 * Math.PI);
+
+                ctx.fillRect(-this.length/2, -this.bredth/2, this.length, this.bredth);
+                //ctx.translate(-this.x, -this.y);
+
+                ctx.fillStyle = "black";
+
+                //draw back left wheel
+                ctx.translate(-2 * this.length / 8, -3 * this.bredth / 12);
+                ctx.fillRect(- this.length / 8, - this.bredth / 12, this.length / 4, this.bredth / 6);
+                ctx.translate(2 * this.length / 8, 3 * this.bredth / 12);
+
+                //draw back right wheel
+                ctx.translate(-2 * this.length / 8, 3 * this.bredth / 12);
+                ctx.fillRect(- this.length / 8, - this.bredth / 12, this.length / 4, this.bredth / 6);
+                ctx.translate(2 * this.length / 8, -3 * this.bredth / 12);
+
+
+                ctx.translate(2 * this.length / 8, 3 * this.bredth / 12);
+                ctx.rotate(this.wheelAngle / 360 * 2 * Math.PI);
+                ctx.fillRect(- this.length / 8, - this.bredth / 12, this.length / 4, this.bredth / 6);
+                ctx.rotate(- this.wheelAngle / 360 * 2 * Math.PI);
+
+                ctx.translate(0, - 6 * this.bredth / 12);
+                //ctx.fillRect(0,0,3,3);
+
+                ctx.rotate(this.wheelAngle / 360 * 2 * Math.PI);
+                ctx.fillRect(- this.length / 8, - this.bredth / 12, this.length / 4, this.bredth / 6);
+
+                //ctx.fillRect(0, 0, this.length / 4, this.bredth / 6);
+                ctx.restore();
+
+                 
+                
+                //ctx.rotate(this.wheelAngle / 360 * 2 * Math.PI);
+
+                //ctx.fillRect(2 * this.length / 8 - this.length / 8, 3 * this.bredth / 12 - this.bredth / 12, this.length / 4, this.bredth / 6);
+                //ctx.fillRect(2 * this.length / 8 - this.length / 8 , -3 * this.bredth / 12 - this.bredth / 12, this.length / 4, this.bredth / 6);
+                //ctx.restore();
+                ctx.fillStyle = "blue";
+                ctx.fillRect(200, 200, this.bredth, this.length);
+
+                ctx.fillStyle = "green";
+                ctx.fillRect(200 + 2 * this.bredth + 10, 200, this.bredth, this.length);
+
+                ctx.fillStyle = "orange";
+                ctx.fillRect(200 - this.bredth - 10, 200, this.bredth, this.length);
+
+                ctx.fillStyle = "yellow";
+                ctx.fillRect(200 + 3 * this.bredth + 20, 200, this.bredth, this.length);
+
+                //console.log("redraw");
+                //console.log(this.x);
+            }
+        }
+
+
+        $(this).keydown(e => {
+            //console.log("hi " + e.which);
+
+            if (e.keyCode == 38 || e.keyCode == 40) {
+                playerCar.footOnGas = true;
+                if (playerCar.speed == 0 && e.keyCode == 38) {
+                    playerCar.gearType = "forward";
+                }
+                else if (playerCar.speed == 0 && e.keyCode == 40) {
+                    playerCar.gearType = "reverse";
+                }
+
+
+                if(playerCar.speed < 5)
+                    playerCar.speed += 0.5;
+             //console.log("speed is " + playerCar.speed)
+            }
+
+            if (e.keyCode == 37) {
+                if (playerCar.wheelAngle > -45)
+                    playerCar.wheelAngle -= 3;
+                // console.log("speed is " + playerCar.wheelAngle)
+            }
+            else if (e.keyCode == 39) {
+                if (playerCar.wheelAngle < 45)
+                    playerCar.wheelAngle += 3;
+                //console.log("speed is " + playerCar.wheelAngle)
+            }
+            else if (e.keyCode == 32) {
+                if (playerCar.speed > 0)
+                    playerCar.speed -= 1;
+                else
+                    playerCar.speed = 0;
+            }
+
+
+
+            document.getElementById("speed").innerHTML = playerCar.speed;
+            document.getElementById("wheelAngle").innerHTML = playerCar.wheelAngle + " degree(s)";
+            
+        })
+
+        $(this).keyup(e => {
+            //console.log("hi, keyup " + e.which);
+
+            if (e.keyCode == 38 || e.keyCode == 40) {
+                playerCar.footOnGas = false;
+            }
+        });
+
+    </script>
+
+
+    <header>
+        <nav class="navbar navbar-light bg-light">
+            <a class="navbar-brand">Parking car simulator</a>
+        </nav>
+
+    </header>
+
+    <section>
+        Contnet: Speed <span id="speed"></span>        Wheel angle: <span id="wheelAngle"></span>      Rotation angle: <span id="rotationAngle"></span>
+    </section>
+
+    <footer>
+        <nav class="navbar navbar-light bg-light">
+            <a class="navbar-brand">
+                © 2019
+                Adrian Kotowski
+            </a>
+        </nav>
+    </footer>
+
+</body>
+</html>
